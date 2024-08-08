@@ -46,13 +46,15 @@ h1 {
     </div>
     <div class="footer">
         <footer>
-            <p>&copy</p>
+            <p>&COPY;;</p>
         </footer>
     </div>
 </body>
 </html>
 
 <?php
+// Store a pattern for only letters
+$strOnlyPattern = "/^[a-zA-Z]+$/";
 function clean_data($data){
     $data = trim($data);
     $data = stripslashes($data);
@@ -71,7 +73,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         $fname = clean_data($_POST['fname']);
         if(strlen($fname) < 2 || strlen($fname) > 50){
             echo "First name must be between 2 and 50 characters";
-        } elseif(!preg_match("/^[a-zA-Z]+$/", $fname)){
+        } elseif(!preg_match($strOnlyPattern, $fname)){
             echo "Invalid first name.";
         }
     }
@@ -84,7 +86,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             echo "Name must be between 2 and 50 words!";
         } else{
             // Check if name contains only letters
-            if(!preg_match("/^[a-zA-Z]+$/", $mname)){
+            if(!preg_match($strOnlyPattern, $mname)){
                 echo "Invalid name!";
             }
         }
@@ -96,7 +98,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         // Check for maximum and minimum name length
         if(strlen($surname) < 2 || strlen($surname) > 50){
             echo "Name must be between 2 and 50 words!";
-        } elseif{
+        } else{
             // Check if name contains only letters
             if(!preg_match("/^[a-zA-Z]+$/", $surname)){
                 echo "Invalid name!";
@@ -107,21 +109,74 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         $Err = 'Country name is required!';
     } else{
         $country = clean_data($_POST['country']);
+        // Check if country country contains only letters
+        if (!preg_match($strOnlyPattern, $country)){
+            echo "Invalid country name!";
+        }
     }
     if(empty($_POST['tel'])){
         $Err = 'Phone number is required!';
     } else{
-        
+        $tel = clean_data($_POST['tel']);
+        if (!preg_match("/^[0-9]+$/", $tel)){
+            echo "Invalid phone number!";
+        }
     }
-    $tel = clean_data($_POST['tel']);
-    $email = clean_data($_POST['email']);
-    $email = 
-    $password = clean_data($_POST['password']);
-    $password_hash = password_hash($password, PASSWORD_DEFAULT);
-    $confirm_password = clean_data($_POST['confirm-password']);
-    $confirm_password_hash = password_hash($confirm_password, PASSWORD_DEFAULT);
-
-    
+    if (empty($_POST['email'])){
+        $Err = 'Email is required!';
+    }else {
+        $email = clean_data($_POST['email']);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            echo "Invalid email format!";
+        }
+    }
+    // Validate passwords
+    function validate_password($password, $confirm_password){
+        $errors = array();
+        // Check if password is at least 8 characters long
+        if (strlen($password) < 8){
+            $errors[] = "Password must be at least 8 charactes long!";
+        }
+        // Check if password contains at least one uppercase letter
+        if (!preg_match("/[A-Z]/", $password)){
+            $errors[] = "Password must contain at least one uppercase letter!";
+        }
+        // Check if password contains at least one lowercase letter
+        if (!preg_match("/[a-z]/", $password)){
+            $errors[] = "Password must contain at least one lowercase letter!";
+        }
+        // Check if password contains at least one digit
+        if (!preg_match("/[0-9]/", $password)){
+            $errors[] = "Password must contain at least one digit!";
+        }
+        // Check if password contains at least one special character
+        $Special_Char_Pattern = "/[!@#$%^&*()_-{}:;',.?]/";
+        if (!preg_match($Special_Char_Pattern, $password)){
+            $errors[] = "Password must contain at least one special character!";
+        }
+        // Check if comfirmed password matches password
+        if ($password != $confirm_password){
+            $errors[] = "Passwords do not match!";
+        }
+        return $errors;
+    }
+    if (empty($_POST['password']) || empty($_POST['confirm-password'])){
+        $Err = "Password error!";
+    } else{
+        $password = clean_data($_POST['password']);
+        $confirm_password = clean_data($_POST['confirm-password']);
+        $error = validate_password($password, $confirm_password);
+        if (!empty($error)){
+            foreach ($error as $err){
+                echo $err. "<br>";
+            }
+        } else{
+            // Password and confirm-password are the same
+            $password = $confirm_password;
+            // Hash password for security purposes
+            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+        }
+    }
 }
 
 ?>
