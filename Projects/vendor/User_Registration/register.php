@@ -4,20 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* body{
-    
-} */
+/* Global Styles */
 
-form{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-h1 {
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+
+header {
+    background-color: #87CEEB; /* Sky Blue */
+    color: #fff;
+    padding: 20px;
     text-align: center;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Hero Section */
+
+.hero {
+    background-color: #ADD8E6; /* Light Sky Blue */
+    color: #fff;
+    padding: 50px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.hero h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Form Styles */
+
+form {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+form input[type="submit"] {
+    background-color: #87CEEB; /* Sky Blue */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+form input[type="submit"]:hover {
+    background-color: #66CCCC; /* Darker Sky Blue */
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    form {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"] {
+        padding: 5px;
+    }
+
+    form input[type="submit"] {
+        padding: 5px 10px;
+    }
+}
+
+
     </style>
     <title>Sign Up</title>
 </head>
@@ -53,130 +159,171 @@ h1 {
 </html>
 
 <?php
-// Store a pattern for only letters
-$strOnlyPattern = "/^[a-zA-Z]+$/";
-function clean_data($data){
+// Configuration
+$dbHost = 'localhost';
+$dbUsername = 'root';
+$dbPassword = '';
+$dbName = 'test';
+
+// Connect to database
+try {
+    $conn = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUsername, $dbPassword);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
+}
+
+// Function to clean and validate input data
+function cleanData($data) {
     $data = trim($data);
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
     return $data;
 }
 
-// Define variables and set to empty values
-$fname = $mname = $surname = $country = $PhoneNumber = $email = $password = $confirm_password = '';
-$fnameErr = $mnameErr = $surnameErr = $countryErr = $PhoneNumberErr = $emailErr = $passwordErr = $confirm_passwordErr = '';
+// Function to validate password
+function validatePassword($password, $confirmPassword) {
+    $errors = array();
+    if (empty($password) || empty($confirmPassword)) {
+        $errors[] = new Exception("Passwords are required!");
+    } else {
+        // Sanitize passwords
+        $password = cleanData($password);
+        $confirmPassword = cleanData($confirmPassword);
 
-if($_SERVER['REQUEST_METHOD'] == 'POST'){
-    if(empty($_POST['fname'])){
-        $fnameErr = "Please enter your first name.";
-    } else{
-        $fname = clean_data($_POST['fname']);
-        if(strlen($fname) < 2 || strlen($fname) > 50){
-            echo "First name must be between 2 and 50 characters";
-        } elseif(!preg_match($strOnlyPattern, $fname)){
-            echo "Invalid first name.";
+        // Check password length
+        if (strlen($password) < 8) {
+            $errors[] = new Exception("Password must be at least 8 characters long!");
         }
-    }
-    if(empty($_POST['mname'])){
-        $Err = '';
-    } else{
-        $mname = clean_data($_POST['mname']);
-        // Check for maximum and minimum name length
-        if(strlen($mname) < 2 || strlen($mname) > 50){
-            echo "Name must be between 2 and 50 words!";
-        } else{
-            // Check if name contains only letters
-            if(!preg_match($strOnlyPattern, $mname)){
-                echo "Invalid name!";
-            }
+
+        // Check password strength
+        if (!preg_match("/[A-Z]/", $password)) {
+            $errors[] = new Exception("Password must contain at least one uppercase letter!");
         }
-    }
-    if(empty($_POST['surname'])){
-        $Err = 'Surname is required!';
-    } else{
-        $surname = clean_data($_POST['surname']);
-        // Check for maximum and minimum name length
-        if(strlen($surname) < 2 || strlen($surname) > 50){
-            echo "Name must be between 2 and 50 words!";
-        } else{
-            // Check if name contains only letters
-            if(!preg_match("/^[a-zA-Z]+$/", $surname)){
-                echo "Invalid name!";
-            }
+        if (!preg_match("/[a-z]/", $password)) {
+            $errors[] = new Exception("Password must contain at least one lowercase letter!");
         }
-    }
-    if(empty($_POST['country'])){
-        $Err = 'Country name is required!';
-    } else{
-        $country = clean_data($_POST['country']);
-        // Check if country country contains only letters
-        if (!preg_match($strOnlyPattern, $country)){
-            echo "Invalid country name!";
+        if (!preg_match("/[0-9]/", $password)) {
+            $errors[] = new Exception("Password must contain at least one digit!");
         }
-    }
-    if(empty($_POST['tel'])){
-        $Err = 'Phone number is required!';
-    } else{
-        $tel = clean_data($_POST['tel']);
-        if (!preg_match("/^[0-9]+$/", $tel)){
-            echo "Invalid phone number!";
-        }
-    }
-    if (empty($_POST['email'])){
-        $Err = 'Email is required!';
-    }else {
-        $email = clean_data($_POST['email']);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            echo "Invalid email format!";
-        }
-    }
-    // Validate passwords
-    function validate_password($password, $confirm_password){
-        $errors = array();
-        // Check if password is at least 8 characters long
-        if (strlen($password) < 8){
-            $errors[] = "Password must be at least 8 charactes long!";
-        }
-        // Check if password contains at least one uppercase letter
-        if (!preg_match("/[A-Z]/", $password)){
-            $errors[] = "Password must contain at least one uppercase letter!";
-        }
-        // Check if password contains at least one lowercase letter
-        if (!preg_match("/[a-z]/", $password)){
-            $errors[] = "Password must contain at least one lowercase letter!";
-        }
-        // Check if password contains at least one digit
-        if (!preg_match("/[0-9]/", $password)){
-            $errors[] = "Password must contain at least one digit!";
-        }
-        // Check if password contains at least one special character
         $Special_Char_Pattern = "/[!@#$%^&*()_-{}:;',.?]/";
-        if (!preg_match($Special_Char_Pattern, $password)){
-            $errors[] = "Password must contain at least one special character!";
+        if (!preg_match($Special_Char_Pattern, $password)) {
+            $errors[] = new Exception("Password must contain at least one special character!");
         }
-        // Check if comfirmed password matches password
-        if ($password != $confirm_password){
-            $errors[] = "Passwords do not match!";
+
+        // Check if confirmed password matches password
+        if ($password != $confirmPassword) {
+            $errors[] = new Exception("Passwords do not match!");
         }
-        return $errors;
     }
-    if (empty($_POST['password']) || empty($_POST['confirm-password'])){
-        $Err = "Password error!";
-    } else{
-        $password = clean_data($_POST['password']);
-        $confirm_password = clean_data($_POST['confirm-password']);
-        $error = validate_password($password, $confirm_password);
-        if (!empty($error)){
-            foreach ($error as $err){
-                echo $err. "<br>";
-            }
+    return $errors;
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Clean and validate input data
+    $fname = cleanData($_POST['fname']);
+    $mname = cleanData($_POST['mname']);
+    $surname = cleanData($_POST['surname']);
+    $country = cleanData($_POST['country']);
+    $tel = cleanData($_POST['tel']);
+    $email = cleanData($_POST['email']);
+    $password = cleanData($_POST['password']);
+    $confirmPassword = cleanData($_POST['confirm-password']);
+
+    // Validate input data
+    $errors = array();
+    if (empty($fname)) {
+        $errors[] = new Exception("First name is required!");
+    }
+    if (!preg_match("/^[a-zA-Z]+$/", $fname)) {
+        $errors[] = new Exception("Invalid first name!");
+    }
+    if (empty($surname)) {
+        $errors[] = new Exception("Surname is required!");
+    }
+    if (!preg_match("/^[a-zA-Z]+$/", $surname)) {
+        $errors[] = new Exception("Invalid surname!");
+    }
+    if (empty($country)) {
+        $errors[] = new Exception("Country is required!");
+    }
+    if (!preg_match("/^[a-zA-Z]+$/", $country)) {
+        $errors[] = new Exception("Invalid country!");
+    }
+    if (empty($tel)) {
+        $errors[] = new Exception("Phone number is required!");
+    }
+    if (!preg_match("/^[0-9]+$/", $tel) || strlen($tel) != 10) {
+        $errors[] = new Exception("Invalid phone number!");
+    }
+    if (empty($email)) {
+        $errors[] = new Exception("Email is required!");
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = new Exception("Invalid email format!");
+    }
+
+    
+
+    // Validate password
+    $passwordErrors = validatePassword($password, $confirmPassword);
+    if (!empty($passwordErrors)) {
+        $errors = array_merge($errors, $passwordErrors);
+    }
+
+    // Check if there are any errors
+    if (!empty($errors)) {
+        foreach ($errors as $error) {
+            echo $error->getMessage() . "<br>";
+        }
+    } else {
+        // Hash password
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+        // Check if first name already exists
+        $stmt = $conn->prepare("SELECT * FROM subscribers WHERE FirstName = :firstname");
+        $stmt->bindParam(':firstname', $fname);
+        $stmt->execute();
+        if($stmt->rowCount() > 0){
+            echo "Error: First name already exists!";
+            exit();
         } else{
-            // Password and confirm-password are the same
-            $password = $confirm_password;
-            // Hash password for security purposes
-            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            // check if email already exists
+            $stmt = $conn->prepare("SELECT * FROM subscribers WHERE Email = :email");
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
+            if($stmt->rowCount() > 0){
+                echo "Error: Email already exists!";
+                exit();
+            }
+        }
+
+        // Prepare and bind SQL statement
+        $query = "INSERT INTO subscribers(FirstName, MiddleName, Surname, Country, PhoneNumber, Email, Password) VALUES(:firstname, :middlename, :surname, :country, :phoneNumber, :email, :password)";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':firstname', $fname);
+        $stmt->bindParam(':middlename', $mname);
+        $stmt->bindParam(':surname', $surname);
+        $stmt->bindParam(':country', $country);
+        $stmt->bindParam(':phoneNumber', $tel);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $passwordHash);
+
+
+
+
+
+        // Insert data into database
+        if ($stmt->execute()) {
+            echo "New record created successfully";
+        } else {
+            echo "Error: " . $stmt->errorInfo()[2];
         }
     }
 }
 
+// Close database connection
+$conn = null;
 ?>
+
