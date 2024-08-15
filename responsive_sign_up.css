@@ -1,0 +1,23 @@
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    form {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"] {
+        padding: 5px;
+    }
+
+    form input[type="submit"] {
+        padding: 5px 10px;
+    }
+}
