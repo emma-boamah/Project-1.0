@@ -54,7 +54,7 @@ switch( $method ) {
         $email = $input['email'];
         $age = $input['age'];
         
-        $query = ("UPDATE profiles SET name=?, email=?, age=?, WHERE id=?");
+        $query = ("UPDATE profiles SET name=?, email=?, age=? WHERE id=?");
         $stmt = $db_Connection->prepare($query);
         $stmt->bindParam(1, $name, PDO::PARAM_STR);
         $stmt->bindParam(2, $email, PDO::PARAM_STR);
