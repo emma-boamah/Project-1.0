@@ -34,7 +34,7 @@ switch( $method ) {
     case 'POST':
         $name = $input['name'];
         $email = $input['email'];
-        $age = $input['age'];
+        $age = (int)$input['age'];
 
         // INSERT DATA INTO THE DATABASE
         $query = ('INSERT INTO profiles (Name, E_mail, Age) VALUES(?, ?, ?)');
@@ -52,13 +52,13 @@ switch( $method ) {
         $id = $_GET['id'];
         $name = $input['name'];
         $email = $input['email'];
-        $age = $input['age'];
+        $age = (int)$input['age'];
         
         $query = ("UPDATE profiles SET name=?, email=?, age=? WHERE id=?");
         $stmt = $db_Connection->prepare($query);
         $stmt->bindParam(1, $name, PDO::PARAM_STR);
         $stmt->bindParam(2, $email, PDO::PARAM_STR);
-        $stmt->bindParam(3, $age, PDO::PARAM_STR);
+        $stmt->bindParam(3, $age, PDO::PARAM_INT);
         $stmt->bindParam(4, $id, PDO::PARAM_INT);
         $stmt->execute();
         $stmt = null;
