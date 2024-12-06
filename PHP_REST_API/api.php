@@ -40,8 +40,8 @@ switch( $method ) {
         $query = ('INSERT INTO profiles (Name, E_mail, Age) VALUES(?, ?, ?)');
         $stmt = $db_Connection->prepare($query);
         $stmt->bindParam(1, $name, PDO::PARAM_STR);
-        $stmt->bindParam(1, $email, PDO::PARAM_STR);
-        $stmt->bindParam(1, $age, PDO::PARAM_INT);
+        $stmt->bindParam(2, $email, PDO::PARAM_STR);
+        $stmt->bindParam(3, $age, PDO::PARAM_INT);
         $stmt->execute();
         $stmt = null;
 
@@ -57,9 +57,9 @@ switch( $method ) {
         $query = ("UPDATE profiles SET name=?, email=?, age=?, WHERE id=?");
         $stmt = $db_Connection->prepare($query);
         $stmt->bindParam(1, $name, PDO::PARAM_STR);
-        $stmt->bindParam(1, $email, PDO::PARAM_STR);
-        $stmt->bindParam(1, $age, PDO::PARAM_STR);
-        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt->bindParam(2, $email, PDO::PARAM_STR);
+        $stmt->bindParam(3, $age, PDO::PARAM_STR);
+        $stmt->bindParam(4, $id, PDO::PARAM_INT);
         $stmt->execute();
         $stmt = null;
         echo json_encode(["message" => "user updated successfully"]);
