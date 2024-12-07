@@ -43,7 +43,7 @@ function handlePut( $db_Conn, $input ){
 
 // FUNCTION TO HANDLE DELETE REQUEST
 function handleDelete($db_Conn, $input){
-    $query = "DELETE * FROM users WHERE id=?";
+    $query = "DELETE FROM users WHERE id=?";
     $stmt = $db_Conn->prepare($query);
     $stmt->bindParam(1, (int)$input["id"], PDO::PARAM_INT);
     $stmt->execute();
