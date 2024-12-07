@@ -10,12 +10,25 @@ switch( $method ) {
     case 'GET':
         if(isset($_GET['id'])){
             $id = $_GET['id'];
+            // VALIDATE ID
+            if(!is_numeric($id)){
+                http_response_code(404);
+                echo json_encode(["error" => "Invalid ID"]);
+                exit;
+            }
             $query = ('SELECT * FROM profiles WHERE ID=?');
             $stmt = $db_Connection->prepare($query);
             $stmt->bindParam(1, $id, PDO::PARAM_INT);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $stmt = null;
+
+            // HANDLING ERROR(S) ON QUERY
+            if(!$result){
+                http_response_code(404);
+                // LOG ERROR
+                exit;
+            }
 
             echo json_encode($result);
         } else{
